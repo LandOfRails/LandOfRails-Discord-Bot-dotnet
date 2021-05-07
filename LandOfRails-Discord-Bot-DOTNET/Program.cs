@@ -1,35 +1,56 @@
 ﻿using System;
 using System.IO;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
+using LandOfRails_Discord_Bot_DOTNET.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LandOfRails_Discord_Bot_DOTNET
 {
     class Program
     {
-        private DiscordSocketClient _client;
-
         public static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
 
         public async Task MainAsync()
         {
-            _client = new DiscordSocketClient();
 
-            _client.Log += Log;
+            var token = await File.ReadAllLinesAsync("Sensitive-data");
+            using (var services = ConfigureServices())
+            {
+                var client = services.GetRequiredService<DiscordSocketClient>();
 
-            var token = await File.ReadAllTextAsync("Sensitive-data");
-            await _client.LoginAsync(TokenType.Bot, token);
-            await _client.StartAsync();
+                client.Log += LogAsync;
+                services.GetRequiredService<CommandService>().Log += LogAsync;
 
-            await Task.Delay(-1);
+                await client.LoginAsync(TokenType.Bot, token[0]);
+                await client.StartAsync();
+
+                await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+
+                await Task.Delay(Timeout.Infinite);
+            }
         }
 
-        private Task Log(LogMessage msg)
+        private Task LogAsync(LogMessage log)
         {
-            Console.WriteLine(msg.ToString());
+            Console.WriteLine(log.ToString());
+
             return Task.CompletedTask;
+        }
+
+        private ServiceProvider ConfigureServices()
+        {
+            return new ServiceCollection()
+                .AddSingleton<DiscordSocketClient>()
+                .AddSingleton<CommandService>()
+                .AddSingleton<CommandHandlingService>()
+                .AddSingleton<HttpClient>()
+                .BuildServiceProvider();
         }
     }
 }
