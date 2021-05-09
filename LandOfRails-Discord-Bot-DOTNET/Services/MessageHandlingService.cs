@@ -35,11 +35,23 @@ namespace LandOfRails_Discord_Bot_DOTNET.Services
         private async Task DiscordOnMessageReceived(SocketMessage arg)
         {
             lordiscordbotContext context = _factory.CreateDbContext();
+            bool userFound = false;
             foreach (User contextUser in context.Users)
             {
                 if (contextUser.MemberId != (long)arg.Author.Id) continue;
+                userFound = true;
                 contextUser.MessageCount += 1;
                 break;
+            }
+
+            if (!userFound)
+            {
+                context.Users.Add(new User()
+                {
+                    DiscordName = arg.Author.Username,
+                    MemberId = (long)arg.Author.Id,
+                    MessageCount = 1
+                });
             }
             context.SaveChangesAsync();
         }
