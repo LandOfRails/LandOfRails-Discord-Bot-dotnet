@@ -21,6 +21,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Services
             _services = services;
 
             _commands.CommandExecuted += CommandExecutedAsync;
+            _commands.Log += LogAsync;
             _discord.MessageReceived += MessageReceivedAsync;
         }
 
@@ -49,6 +50,13 @@ namespace LandOfRails_Discord_Bot_DOTNET.Services
                 return;
 
             await context.Channel.SendMessageAsync($"error: {result}");
+        }
+
+        private Task LogAsync(LogMessage log)
+        {
+            Console.WriteLine(log.ToString());
+
+            return Task.CompletedTask;
         }
     }
 }

@@ -21,20 +21,18 @@ namespace LandOfRails_Discord_Bot_DOTNET
         {
 
             var token = await File.ReadAllLinesAsync("Sensitive-data");
-            using (var services = ConfigureServices())
-            {
-                var client = services.GetRequiredService<DiscordSocketClient>();
+            await using var services = ConfigureServices();
+            var client = services.GetRequiredService<DiscordSocketClient>();
 
-                client.Log += LogAsync;
-                services.GetRequiredService<CommandService>().Log += LogAsync;
+            client.Log += LogAsync;
+            services.GetRequiredService<CommandService>().Log += LogAsync;
 
-                await client.LoginAsync(TokenType.Bot, token[0]);
-                await client.StartAsync();
+            await client.LoginAsync(TokenType.Bot, token[0]);
+            await client.StartAsync();
 
-                await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+            await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
 
-                await Task.Delay(Timeout.Infinite);
-            }
+            await Task.Delay(Timeout.Infinite);
         }
 
         private Task LogAsync(LogMessage log)
