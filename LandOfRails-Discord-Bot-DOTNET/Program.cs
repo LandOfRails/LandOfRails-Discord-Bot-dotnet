@@ -14,6 +14,7 @@ namespace LandOfRails_Discord_Bot_DOTNET
 {
     class Program
     {
+        //context PW section = {File.ReadAllLines("Sensitive-data")[1]}
         public static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
 
@@ -31,6 +32,7 @@ namespace LandOfRails_Discord_Bot_DOTNET
             await client.StartAsync();
 
             await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+            services.GetRequiredService<MessageHandlingService>().register();
 
             await Task.Delay(Timeout.Infinite);
         }
@@ -48,6 +50,7 @@ namespace LandOfRails_Discord_Bot_DOTNET
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
+                .AddSingleton<MessageHandlingService>()
                 .AddSingleton<HttpClient>()
                 .AddSingleton<lordiscordbotContext>()
                 .BuildServiceProvider();

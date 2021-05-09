@@ -13,11 +13,6 @@ namespace LandOfRails_Discord_Bot_DOTNET.Models
         {
         }
 
-        public lordiscordbotContext(DbContextOptions<lordiscordbotContext> options)
-            : base(options)
-        {
-        }
-
         public virtual DbSet<CommandIdea> CommandIdeas { get; set; }
         public virtual DbSet<ElectionLineup> ElectionLineups { get; set; }
         public virtual DbSet<LauncherAccess> LauncherAccesses { get; set; }
