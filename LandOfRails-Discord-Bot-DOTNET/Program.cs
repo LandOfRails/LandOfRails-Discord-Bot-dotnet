@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using LandOfRails_Discord_Bot_DOTNET.Models;
 using LandOfRails_Discord_Bot_DOTNET.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -50,6 +51,7 @@ namespace LandOfRails_Discord_Bot_DOTNET
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton<HttpClient>()
+                .AddSingleton<lordiscordbotContext>()
                 .BuildServiceProvider();
         }
     }
