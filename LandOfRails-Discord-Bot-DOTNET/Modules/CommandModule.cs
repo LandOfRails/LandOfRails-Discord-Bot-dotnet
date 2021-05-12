@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using LandOfRails_Discord_Bot_DOTNET.Models;
-using Newtonsoft.Json.Linq;
+using LandOfRails_Discord_Bot_DOTNET.Services;
 
 namespace LandOfRails_Discord_Bot_DOTNET.Modules
 {
@@ -41,19 +41,20 @@ namespace LandOfRails_Discord_Bot_DOTNET.Modules
         }
 
         [Command("vote")]
-        public async Task startPoll(bool anonym, int hoursTilEnd, [Remainder] string question)
+        public async Task startPoll(bool anonym, double hoursTilEnd, [Remainder] string question)
         {
-            var end = new DateTimeOffset(DateTime.Now).AddHours(hoursTilEnd);
+            var end = new DateTimeOffset(DateTime.Now).AddMinutes(hoursTilEnd);
             EmbedBuilder builder = new EmbedBuilder().WithColor(Color.Gold).WithAuthor(anonym ? "Anonym" : Context.User.Username).WithTitle(question).WithDescription("\uD83D\uDC4D Ja! = 0 \n \n \uD83D\uDC4E Nein! = 0 \n \n \u270A Mir egal... = 0").WithFooter("Endet")
                 .WithTimestamp(end);
 
             var message = await Context.Guild.GetTextChannel(581602258102517760).SendMessageAsync(null, false, builder.Build());
-            await message.AddReactionsAsync(new[] { new Emoji("\uD83D\uDC4D"), new Emoji("\uD83D\uDC4E"), new Emoji("\u270A") });
+            await message.AddReactionsAsync(new IEmote[] { new Emoji("\uD83D\uDC4D"), new Emoji("\uD83D\uDC4E"), new Emoji("\u270A") });
 
             lordiscordbotContext context = new();
             Poll poll = new Poll
             {
                 MessageId = (long)message.Id,
+                TextChannelId = (long)message.Channel.Id,
                 Member = context.Users.AsQueryable().First(x => x.MemberId == (long)Context.User.Id),
                 Question = question,
                 StartDatetime = DateTime.Now,
@@ -67,6 +68,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Modules
             poll.PollOptions = pollOptions;
             context.Polls.Add(poll);
             await context.SaveChangesAsync();
+            Task.Delay(poll.EndDatetime.TimeOfDay).ContinueWith(_ => PollHandlingService.FinishPoll(poll));
             await context.DisposeAsync();
         }
     }

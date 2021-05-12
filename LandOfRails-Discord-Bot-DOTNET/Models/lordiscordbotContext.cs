@@ -125,6 +125,10 @@ namespace LandOfRails_Discord_Bot_DOTNET.Models
 
                 entity.Property(e => e.StartDatetime).HasColumnName("Start_datetime");
 
+                entity.Property(e => e.TextChannelId)
+                    .HasColumnType("bigint(20)")
+                    .HasColumnName("TextChannelID");
+
                 entity.HasOne(d => d.Member)
                     .WithMany(p => p.Polls)
                     .HasForeignKey(d => d.MemberId)
