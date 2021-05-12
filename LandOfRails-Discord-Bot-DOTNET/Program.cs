@@ -20,7 +20,6 @@ namespace LandOfRails_Discord_Bot_DOTNET
 
         public async Task MainAsync()
         {
-
             var token = await File.ReadAllLinesAsync("Sensitive-data");
             await using var services = ConfigureServices();
             var client = services.GetRequiredService<DiscordSocketClient>();

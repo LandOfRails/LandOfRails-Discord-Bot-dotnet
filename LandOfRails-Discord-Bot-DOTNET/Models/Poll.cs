@@ -13,6 +13,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Models
         }
 
         public int Id { get; set; }
+        public long MessageId { get; set; }
         public long? MemberId { get; set; }
         public string Question { get; set; }
         public DateTime StartDatetime { get; set; }
