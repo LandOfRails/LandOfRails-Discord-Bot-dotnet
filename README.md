@@ -6,5 +6,5 @@
 ## Dependencies
 This Discord bot uses the following libraries:
 * [Discord.Net (unofficial .NET API Wrapper for the Discord client)](https://github.com/discord-net/Discord.Net)
-* [Connector/NET (MySql .NET Connector](https://dev.mysql.com/downloads/connector/net/)
+* [Connector/NET (MySql .NET Connector)](https://dev.mysql.com/downloads/connector/net/)
 * [Microsoft.EntityFrameworkCore (Objekt-Datenbank-Mapper)](https://docs.microsoft.com/de-de/ef/)
