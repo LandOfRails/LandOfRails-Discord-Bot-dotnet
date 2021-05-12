@@ -84,6 +84,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Services
                         {
                             properties.Embed = message.Embeds.First().ToEmbedBuilder().WithDescription(description).Build();
                         });
+                        await context.DisposeAsync();
                     }
                 }
             }
