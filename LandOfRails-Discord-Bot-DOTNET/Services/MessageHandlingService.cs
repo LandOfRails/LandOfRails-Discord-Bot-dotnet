@@ -48,7 +48,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Services
 
                 if (!userFound)
                 {
-                    context.Users.Add(new User()
+                    context.Users.Add(new User
                     {
                         DiscordName = arg.Author.Username,
                         MemberId = (long) arg.Author.Id,
@@ -57,6 +57,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Services
                 }
 
                 await context.SaveChangesAsync();
+                await context.DisposeAsync();
             }
         }
     }

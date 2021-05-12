@@ -32,9 +32,11 @@ namespace LandOfRails_Discord_Bot_DOTNET.Modules
             var dbUser = context.Users.AsQueryable().First(x => x.MemberId == (long)Context.User.Id);
 
             var topUsers = context.Users.AsQueryable().OrderByDescending(x => x.MessageCount).Take(5).ToList();
-            for (int i = 0; i < topUsers.Count; i++) embedBuilder.AddField((i + 1) + ". " + topUsers[i].DiscordName, topUsers[i].MessageCount, true);
+            await context.DisposeAsync();
+            for (int i = 0; i < topUsers.Count; i++) embedBuilder.AddField((i + 1) + ". " + topUsers[i].DiscordName, $"Messages: {topUsers[i].MessageCount}\nReactions: {topUsers[i].ReactionCount}", true);
 
-            embedBuilder.AddField("Your messagecount", dbUser != null ? dbUser.MessageCount : "-", true);
+            embedBuilder.AddField("Your messagecount", dbUser != null ? dbUser.MessageCount : "-");
+            embedBuilder.AddField("Your reactioncount", dbUser != null ? dbUser.ReactionCount : "-", true);
             await ReplyAsync(null, false, embedBuilder.Build());
         }
 
@@ -42,7 +44,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Modules
         public async Task startPoll(bool anonym, int hoursTilEnd, [Remainder] string question)
         {
             var end = new DateTimeOffset(DateTime.Now).AddHours(hoursTilEnd);
-            EmbedBuilder builder = new EmbedBuilder().WithColor(Color.Gold).WithAuthor(anonym ? "Anonym" : Context.User.Username).WithTitle(question).WithDescription("\uD83D\uDC4D Ja! \n \n \uD83D\uDC4E Nein! \n \n \u270A Mir egal...").WithFooter("Endet")
+            EmbedBuilder builder = new EmbedBuilder().WithColor(Color.Gold).WithAuthor(anonym ? "Anonym" : Context.User.Username).WithTitle(question).WithDescription("\uD83D\uDC4D Ja! = 0 \n \n \uD83D\uDC4E Nein! = 0 \n \n \u270A Mir egal... = 0").WithFooter("Endet")
                 .WithTimestamp(end);
 
             var message = await Context.Guild.GetTextChannel(581602258102517760).SendMessageAsync(null, false, builder.Build());
@@ -59,12 +61,13 @@ namespace LandOfRails_Discord_Bot_DOTNET.Modules
                 TeamVoting = false
             };
             ICollection<PollOption> pollOptions = new List<PollOption>();
-            pollOptions.Add(new PollOption { VoteOption = "Ja!", FkPoll = poll, Votes = 0 });
-            pollOptions.Add(new PollOption { VoteOption = "Nein!", FkPoll = poll, Votes = 0 });
-            pollOptions.Add(new PollOption { VoteOption = "Mir egal...", FkPoll = poll, Votes = 0 });
+            pollOptions.Add(new PollOption { VoteOption = "Ja!", EmojiUnicode = "\uD83D\uDC4D", FkPoll = poll, Votes = 0 });
+            pollOptions.Add(new PollOption { VoteOption = "Nein!", EmojiUnicode = "\uD83D\uDC4E", FkPoll = poll, Votes = 0 });
+            pollOptions.Add(new PollOption { VoteOption = "Mir egal...", EmojiUnicode = "\u270A", FkPoll = poll, Votes = 0 });
             poll.PollOptions = pollOptions;
             context.Polls.Add(poll);
             await context.SaveChangesAsync();
+            await context.DisposeAsync();
         }
     }
 }

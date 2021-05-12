@@ -32,6 +32,7 @@ namespace LandOfRails_Discord_Bot_DOTNET
 
             await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
             services.GetRequiredService<MessageHandlingService>().register();
+            services.GetRequiredService<ReactionHandlingService>().register();
 
             await Task.Delay(Timeout.Infinite);
         }
@@ -50,6 +51,7 @@ namespace LandOfRails_Discord_Bot_DOTNET
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton<MessageHandlingService>()
+                .AddSingleton<ReactionHandlingService>()
                 .AddSingleton<HttpClient>()
                 .AddSingleton<lordiscordbotContext>()
                 .BuildServiceProvider();

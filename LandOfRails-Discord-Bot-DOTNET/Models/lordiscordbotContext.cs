@@ -18,6 +18,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Models
         public virtual DbSet<LauncherAccess> LauncherAccesses { get; set; }
         public virtual DbSet<Poll> Polls { get; set; }
         public virtual DbSet<PollOption> PollOptions { get; set; }
+        public virtual DbSet<PollVotedRegister> PollVotedRegisters { get; set; }
         public virtual DbSet<TeamRulesAccepted> TeamRulesAccepteds { get; set; }
         public virtual DbSet<User> Users { get; set; }
 
@@ -139,6 +140,10 @@ namespace LandOfRails_Discord_Bot_DOTNET.Models
                     .HasColumnType("int(11)")
                     .HasColumnName("ID");
 
+                entity.Property(e => e.EmojiUnicode)
+                    .IsRequired()
+                    .HasMaxLength(64);
+
                 entity.Property(e => e.FkPollId)
                     .HasColumnType("int(11)")
                     .HasColumnName("FK_Poll_ID");
@@ -151,6 +156,37 @@ namespace LandOfRails_Discord_Bot_DOTNET.Models
                     .WithMany(p => p.PollOptions)
                     .HasForeignKey(d => d.FkPollId)
                     .HasConstraintName("PollOptions_ibfk_1");
+            });
+
+            modelBuilder.Entity<PollVotedRegister>(entity =>
+            {
+                entity.ToTable("PollVotedRegister");
+
+                entity.HasIndex(e => e.FkPollOptionsId, "FK_PollOptions_ID");
+
+                entity.HasIndex(e => e.FkMemberId, "FK_Poll_ID");
+
+                entity.Property(e => e.Id)
+                    .HasColumnType("int(11)")
+                    .HasColumnName("ID");
+
+                entity.Property(e => e.FkMemberId)
+                    .HasColumnType("bigint(11)")
+                    .HasColumnName("FK_Member_ID");
+
+                entity.Property(e => e.FkPollOptionsId)
+                    .HasColumnType("int(11)")
+                    .HasColumnName("FK_PollOptions_ID");
+
+                entity.HasOne(d => d.FkMember)
+                    .WithMany(p => p.PollVotedRegisters)
+                    .HasForeignKey(d => d.FkMemberId)
+                    .HasConstraintName("PollVotedRegister_ibfk_3");
+
+                entity.HasOne(d => d.FkPollOptions)
+                    .WithMany(p => p.PollVotedRegisters)
+                    .HasForeignKey(d => d.FkPollOptionsId)
+                    .HasConstraintName("PollVotedRegister_ibfk_1");
             });
 
             modelBuilder.Entity<TeamRulesAccepted>(entity =>
@@ -180,6 +216,8 @@ namespace LandOfRails_Discord_Bot_DOTNET.Models
                 entity.Property(e => e.DiscordName).IsRequired();
 
                 entity.Property(e => e.MessageCount).HasColumnType("int(11)");
+
+                entity.Property(e => e.ReactionCount).HasColumnType("int(11)");
             });
 
             OnModelCreatingPartial(modelBuilder);
