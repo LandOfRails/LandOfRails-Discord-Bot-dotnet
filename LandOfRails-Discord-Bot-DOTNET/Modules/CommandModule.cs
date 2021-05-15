@@ -43,7 +43,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Modules
         [Command("vote")]
         public async Task startPoll(bool anonym, double hoursTilEnd, [Remainder] string question)
         {
-            var end = new DateTimeOffset(DateTime.Now).AddMinutes(hoursTilEnd);
+            var end = new DateTimeOffset(DateTime.Now).AddHours(hoursTilEnd);
             EmbedBuilder builder = new EmbedBuilder().WithColor(Color.Gold).WithAuthor(anonym ? "Anonym" : Context.User.Username).WithTitle(question).WithDescription("\uD83D\uDC4D Ja! = 0 \n \n \uD83D\uDC4E Nein! = 0 \n \n \u270A Mir egal... = 0").WithFooter("Endet")
                 .WithTimestamp(end);
 
