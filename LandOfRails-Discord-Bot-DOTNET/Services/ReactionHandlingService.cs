@@ -20,8 +20,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Services
         {
             _discord = services.GetRequiredService<DiscordSocketClient>();
             _services = services;
-            _factory = new DbContextFactory<lordiscordbotContext>(services,
-                new DbContextOptions<lordiscordbotContext>(), new DbContextFactorySource<lordiscordbotContext>());
+            _factory = new DbContextFactory<lordiscordbotContext>(services, new DbContextOptions<lordiscordbotContext>(), new DbContextFactorySource<lordiscordbotContext>());
 
             _discord.ReactionAdded += DiscordOnReactionAdded;
             _discord.ReactionRemoved += DiscordOnReactionRemoved;
@@ -35,7 +34,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Services
                 lordiscordbotContext context = _factory.CreateDbContext();
                 bool userFound = false;
                 foreach (User contextUser in context.Users.AsQueryable()
-                    .Where(contextUser => contextUser.MemberId == (long) arg3.UserId))
+                    .Where(contextUser => contextUser.MemberId == (long)arg3.UserId))
                 {
                     userFound = true;
                     contextUser.ReactionCount += 1;
@@ -47,7 +46,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Services
                     context.Users.Add(new User
                     {
                         DiscordName = arg3.User.Value.Username,
-                        MemberId = (long) arg3.UserId,
+                        MemberId = (long)arg3.UserId,
                         ReactionCount = 1
                     });
                 }

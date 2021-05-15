@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -12,7 +13,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Services
 {
     public class PollHandlingService
     {
-        private static DiscordSocketClient _discord;
+        private readonly DiscordSocketClient _discord;
         private readonly IServiceProvider _services;
         private readonly DbContextFactory<lordiscordbotContext> _factory;
 
@@ -67,23 +68,35 @@ namespace LandOfRails_Discord_Bot_DOTNET.Services
             }
         }
 
-        public async void register()
+        public void register()
         {
             var context = _factory.CreateDbContext();
-            foreach (Poll poll in context.Polls.AsQueryable().Include(x => x.PollOptions).Where(x => x.EndDatetime.CompareTo(DateTime.Now) > 0))
+            foreach (Poll poll in context.Polls.AsQueryable().Where(x => !x.Finished))
             {
-                Task.Delay(poll.EndDatetime.TimeOfDay).ContinueWith(_ => FinishPoll(poll));
+                var timespan = poll.EndDatetime.Subtract(DateTime.Now);
+                if(timespan.TotalMilliseconds < 0) timespan = TimeSpan.Zero;
+                Task.Delay(timespan).ContinueWith(_ => FinishPoll(poll));
             }
+            context.DisposeAsync();
         }
 
-        public static async void FinishPoll(Poll poll)
+        public async Task FinishPoll(Poll poll)
         {
-            var message = _discord.GetGuild(394112479283904512).GetTextChannel((ulong) poll.TextChannelId).GetMessageAsync((ulong) poll.MessageId).Result as SocketUserMessage;
+            var textChannel = _discord.GetGuild(394112479283904512).GetTextChannel((ulong)poll.TextChannelId);
+            if (await textChannel.GetMessageAsync((ulong) poll.MessageId) is not IUserMessage message)
+            {
+                Console.WriteLine("Poll could not be finished. Message might be null.");
+                return;
+            }
             await message.RemoveAllReactionsAsync();
             await message.ModifyAsync(properties =>
             {
-                properties.Embed = message.Embeds.First().ToEmbedBuilder().WithColor(Color.Green).Build();
+                properties.Embed = message.Embeds.First().ToEmbedBuilder().WithColor(Color.Green).WithFooter("Beendet").Build();
             });
+            var context = _factory.CreateDbContext();
+            context.Polls.AsQueryable().First(x => x.Equals(poll)).Finished = true;
+            await context.SaveChangesAsync();
+            await context.DisposeAsync();
         }
     }
 }

@@ -20,6 +20,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Models
         public DateTime StartDatetime { get; set; }
         public DateTime EndDatetime { get; set; }
         public bool TeamVoting { get; set; }
+        public bool Finished { get; set; }
 
         public virtual User Member { get; set; }
         public virtual ICollection<PollOption> PollOptions { get; set; }

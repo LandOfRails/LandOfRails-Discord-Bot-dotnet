@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using LandOfRails_Discord_Bot_DOTNET.Models;
-using LandOfRails_Discord_Bot_DOTNET.Services;
 
 namespace LandOfRails_Discord_Bot_DOTNET.Modules
 {
@@ -68,7 +68,25 @@ namespace LandOfRails_Discord_Bot_DOTNET.Modules
             poll.PollOptions = pollOptions;
             context.Polls.Add(poll);
             await context.SaveChangesAsync();
-            Task.Delay(poll.EndDatetime.TimeOfDay).ContinueWith(_ => PollHandlingService.FinishPoll(poll));
+            await context.DisposeAsync();
+            Task.Delay(poll.EndDatetime.Subtract(DateTime.Now)).ContinueWith(_ => FinishPoll(poll, Context.Channel));
+        }
+
+        public async Task FinishPoll(Poll poll, ISocketMessageChannel socketMessageChannel)
+        {
+            if (await socketMessageChannel.GetMessageAsync((ulong)poll.MessageId) is not IUserMessage message)
+            {
+                Console.WriteLine("Poll could not be finished. Message might be null.");
+                return;
+            }
+            await message.RemoveAllReactionsAsync();
+            await message.ModifyAsync(properties =>
+            {
+                properties.Embed = message.Embeds.First().ToEmbedBuilder().WithColor(Color.Green).WithFooter("Beendet").Build();
+            });
+            var context = new lordiscordbotContext();
+            context.Polls.AsQueryable().First(x => x.Equals(poll)).Finished = true;
+            await context.SaveChangesAsync();
             await context.DisposeAsync();
         }
     }
