@@ -26,6 +26,36 @@ namespace LandOfRails_Discord_Bot_DOTNET.Services
             _factory = new DbContextFactory<lordiscordbotContext>(services, new DbContextOptions<lordiscordbotContext>(), new DbContextFactorySource<lordiscordbotContext>());
 
             _discord.Ready += DiscordOnReady;
+            _discord.InteractionCreated += DiscordOnInteractionCreated;
+        }
+
+        private async Task DiscordOnInteractionCreated(SocketInteraction arg)
+        {
+            if (!arg.User.IsBot && !arg.User.IsWebhook)
+            {
+                lordiscordbotContext context = _factory.CreateDbContext();
+                bool userFound = false;
+                foreach (User contextUser in context.Users.AsQueryable()
+                    .Where(contextUser => contextUser.MemberId == (long)arg.User.Id))
+                {
+                    userFound = true;
+                    contextUser.InteractionCount += 1;
+                    break;
+                }
+
+                if (!userFound)
+                {
+                    context.Users.Add(new User
+                    {
+                        DiscordName = arg.User.Username,
+                        MemberId = (long)arg.User.Id,
+                        InteractionCount = 1
+                    });
+                }
+
+                await context.SaveChangesAsync();
+                await context.DisposeAsync();
+            }
         }
 
         private async Task DiscordOnReady()

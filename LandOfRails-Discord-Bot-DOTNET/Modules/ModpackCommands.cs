@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Discord;
 using Discord.Net;
 using Discord.WebSocket;
 using LandOfRails_Discord_Bot_DOTNET.Models;
+using LandOfRails_Discord_Bot_DOTNET.Utils;
 using Microsoft.EntityFrameworkCore.Internal;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Crypto.Engines;
@@ -35,6 +37,24 @@ namespace LandOfRails_Discord_Bot_DOTNET.Modules
                 switch (command.Data.Name)
                 {
                     case "update-modpack":
+                        var context = _factory.CreateDbContext();
+                        if (context.Launchers.Any(x =>
+                            x.FkMemberId == (long) command.User.Id &&
+                            x.ModpackShortcut.Equals(command.Data.Options.ElementAt(0).Value)))
+                        {
+                            var modpack = GetModpackList().First(x => x.Shortcut.Equals(command.Data.Options.ElementAt(0).Value));
+                            var modpackVersion = new Version(modpack.ModpackVersion);
+                            var newVersion = new Version(command.Data.Options.ElementAt(2).Value.ToString()!);
+                            if (modpackVersion < newVersion)
+                            {
+
+                            }
+                            else
+                            {
+                                await command.RespondAsync($"Please specify a higher version than {modpackVersion}. For example {modpackVersion.IncrementBuild()}");
+                            }
+                        }
+                        else await command.RespondAsync("You don't have permission to use this command for this modpack.");
                         break;
                     default:
                         break;
@@ -47,7 +67,26 @@ namespace LandOfRails_Discord_Bot_DOTNET.Modules
             var updateModpackCommand = new SlashCommandBuilder()
                 .WithName("update-modpack")
                 .WithDescription("Updates a specific modpack to a new version in the LandOfRails Launcher.")
-                .AddOption("server", ApplicationCommandOptionType.String, "The server which belongs to the modpack.",true, false, null, new []{new ApplicationCommandOptionChoiceProperties(){Name = "Traincraft",Value = "TC"}, new ApplicationCommandOptionChoiceProperties() { Name = "Immersive Railroading", Value = "IR" }, new ApplicationCommandOptionChoiceProperties() { Name = "Real Train Mod", Value = "RTM" }, new ApplicationCommandOptionChoiceProperties() { Name = "Zora no Densha", Value = "ZnD" } });
+                .AddOption(new SlashCommandOptionBuilder()
+                    .WithName("server")
+                    .WithDescription("The server which belongs to the modpack.")
+                    .WithRequired(true)
+                    .AddChoice("Traincraft", "tc")
+                    .AddChoice("Immersive Railroading", "ir")
+                    .AddChoice("Real Train Mod", "rtm")
+                    .AddChoice("Zora no Densha", "znd")
+                    .WithType(ApplicationCommandOptionType.String)
+                ).AddOption(new SlashCommandOptionBuilder()
+                    .WithName("download-link")
+                    .WithDescription("Direct download link to modpack.zip")
+                    .WithRequired(true)
+                    .WithType(ApplicationCommandOptionType.String)
+                ).AddOption(new SlashCommandOptionBuilder()
+                    .WithName("version")
+                    .WithDescription("The version to which the modpack should be updated.")
+                    .WithRequired(true)
+                    .WithType(ApplicationCommandOptionType.String)
+                );
 
             try
             {
@@ -63,5 +102,6 @@ namespace LandOfRails_Discord_Bot_DOTNET.Modules
             }
         }
 
+        private List<Modpack> GetModpackList() => JsonConvert.DeserializeObject<List<Modpack>>(File.ReadAllText("/var/www/launcher/ModpackList.json"));
     }
 }

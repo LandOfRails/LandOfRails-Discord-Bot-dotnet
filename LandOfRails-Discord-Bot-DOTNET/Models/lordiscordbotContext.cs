@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -15,6 +14,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Models
 
         public virtual DbSet<CommandIdea> CommandIdeas { get; set; }
         public virtual DbSet<ElectionLineup> ElectionLineups { get; set; }
+        public virtual DbSet<Launcher> Launchers { get; set; }
         public virtual DbSet<LauncherAccess> LauncherAccesses { get; set; }
         public virtual DbSet<Poll> Polls { get; set; }
         public virtual DbSet<PollOption> PollOptions { get; set; }
@@ -27,7 +27,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseMySQL($"server=landofrails.net;uid=lor-discord-bot;pwd={File.ReadAllLines("Sensitive-data")[1]};database=lor-discord-bot");
+                optionsBuilder.UseMySQL("server=landofrails.net;uid=lor-discord-bot;pwd=v3iLYCTPLvaLPC9;database=lor-discord-bot");
             }
         }
 
@@ -83,6 +83,27 @@ namespace LandOfRails_Discord_Bot_DOTNET.Models
                     .WithMany(p => p.ElectionLineupMembers)
                     .HasForeignKey(d => d.MemberId)
                     .HasConstraintName("ElectionLineup_ibfk_1");
+            });
+
+            modelBuilder.Entity<Launcher>(entity =>
+            {
+                entity.HasKey(e => e.FkMemberId)
+                    .HasName("PRIMARY");
+
+                entity.ToTable("launcher");
+
+                entity.Property(e => e.FkMemberId)
+                    .HasColumnType("bigint(20)")
+                    .HasColumnName("FK_Member_ID");
+
+                entity.Property(e => e.ModpackShortcut)
+                    .IsRequired()
+                    .HasMaxLength(64);
+
+                entity.HasOne(d => d.FkMember)
+                    .WithOne(p => p.Launcher)
+                    .HasForeignKey<Launcher>(d => d.FkMemberId)
+                    .HasConstraintName("launcher_ibfk_1");
             });
 
             modelBuilder.Entity<LauncherAccess>(entity =>
@@ -218,6 +239,8 @@ namespace LandOfRails_Discord_Bot_DOTNET.Models
                     .HasColumnName("MemberID");
 
                 entity.Property(e => e.DiscordName).IsRequired();
+
+                entity.Property(e => e.InteractionCount).HasColumnType("int(11)");
 
                 entity.Property(e => e.MessageCount).HasColumnType("int(11)");
 
