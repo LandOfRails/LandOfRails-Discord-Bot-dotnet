@@ -88,10 +88,13 @@ namespace LandOfRails_Discord_Bot_DOTNET.Models
 
             modelBuilder.Entity<Launcher>(entity =>
             {
-                entity.HasKey(e => e.FkMemberId)
-                    .HasName("PRIMARY");
-
                 entity.ToTable("launcher");
+
+                entity.HasIndex(e => e.FkMemberId, "FK_Member_ID");
+
+                entity.Property(e => e.Id)
+                    .HasColumnType("int(11)")
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.FkMemberId)
                     .HasColumnType("bigint(20)")
@@ -100,11 +103,6 @@ namespace LandOfRails_Discord_Bot_DOTNET.Models
                 entity.Property(e => e.ModpackShortcut)
                     .IsRequired()
                     .HasMaxLength(64);
-
-                entity.HasOne(d => d.FkMember)
-                    .WithOne(p => p.Launcher)
-                    .HasForeignKey<Launcher>(d => d.FkMemberId)
-                    .HasConstraintName("launcher_ibfk_1");
             });
 
             modelBuilder.Entity<LauncherAccess>(entity =>

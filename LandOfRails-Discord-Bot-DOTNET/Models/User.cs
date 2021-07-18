@@ -21,7 +21,6 @@ namespace LandOfRails_Discord_Bot_DOTNET.Models
         public int ReactionCount { get; set; }
         public int InteractionCount { get; set; }
 
-        public virtual Launcher Launcher { get; set; }
         public virtual ICollection<ElectionLineup> ElectionLineupByMembers { get; set; }
         public virtual ICollection<ElectionLineup> ElectionLineupMembers { get; set; }
         public virtual ICollection<PollVotedRegister> PollVotedRegisters { get; set; }

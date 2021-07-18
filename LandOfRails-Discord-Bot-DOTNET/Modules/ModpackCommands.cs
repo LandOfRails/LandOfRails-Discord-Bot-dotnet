@@ -26,6 +26,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Modules
             this._factory = _factory;
 
             UpdateModpack();
+            AddPermission();
 
             _discord.InteractionCreated += DiscordOnInteractionCreated;
         }
@@ -34,10 +35,10 @@ namespace LandOfRails_Discord_Bot_DOTNET.Modules
         {
             if (arg is SocketSlashCommand command)
             {
+                var context = _factory.CreateDbContext();
                 switch (command.Data.Name)
                 {
                     case "update-modpack":
-                        var context = _factory.CreateDbContext();
                         if (context.Launchers.Any(x =>
                             x.FkMemberId == (long) command.User.Id &&
                             x.ModpackShortcut.Equals(command.Data.Options.ElementAt(0).Value)))
@@ -56,9 +57,35 @@ namespace LandOfRails_Discord_Bot_DOTNET.Modules
                         }
                         else await command.RespondAsync("You don't have permission to use this command for this modpack.");
                         break;
-                    default:
+                    case "add-permission":
+                        if (command.User.Id == 222733101770604545 || context.Launchers.Any(x =>
+                            x.FkMemberId == (long)command.User.Id &&
+                            x.ModpackShortcut.Equals(command.Data.Options.ElementAt(0).Value)))
+                        {
+                            var user = command.Data.Options.ElementAt(1).Value as SocketUser;
+                            if (context.Launchers.Any(x => x.FkMemberId == (long) user.Id && x.ModpackShortcut.Equals(command.Data.Options.ElementAt(0).Value.ToString())))
+                            {
+                                await command.RespondAsync(
+                                    $"{user} already has all permissions to the {command.Data.Options.ElementAt(0).Value} modpack.");
+                                break;
+                            }
+                            context.Launchers.Add(new Launcher()
+                            {
+                                FkMemberId = (long) user.Id,
+                                ModpackShortcut = command.Data.Options.ElementAt(0).Value.ToString()
+                            });
+                            await context.SaveChangesAsync();
+                            await command.RespondAsync($"{user} now has all permissions to the {command.Data.Options.ElementAt(0).Value} modpack.");
+                        }
+                        else
+                        {
+                            await command.RespondAsync(
+                                "You don't have permission to use this command for this modpack. If you think this is wrong contact MarkenJaden.");
+                        }
                         break;
                 }
+
+                await context.DisposeAsync();
             }
         }
 
@@ -116,7 +143,24 @@ namespace LandOfRails_Discord_Bot_DOTNET.Modules
                     .AddChoice("Real Train Mod", "rtm")
                     .AddChoice("Zora no Densha", "znd")
                     .WithType(ApplicationCommandOptionType.String)
+                ).AddOption(new SlashCommandOptionBuilder()
+                    .WithName("user")
+                    .WithDescription("User who should get permissions for the modpack.")
+                    .WithRequired(true)
+                    .WithType(ApplicationCommandOptionType.User)
                 );
+            try
+            {
+                _discord.Rest.CreateGlobalCommand(addPermissionCommand.Build());
+            }
+            catch (ApplicationCommandException exception)
+            {
+                // If our command was invalid, we should catch an ApplicationCommandException. This exception contains the path of the error as well as the error message. You can serialize the Error field in the exception to get a visual of where your error is.
+                var json = JsonConvert.SerializeObject(exception.Error, Formatting.Indented);
+
+                // You can send this error somewhere or just print it to the console, for this example we're just going to print it.
+                Console.WriteLine(json);
+            }
         }
 
         private List<Modpack> GetModpackList() => JsonConvert.DeserializeObject<List<Modpack>>(File.ReadAllText("/var/www/launcher/ModpackList.json"));
