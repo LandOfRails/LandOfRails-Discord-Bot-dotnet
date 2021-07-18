@@ -102,6 +102,23 @@ namespace LandOfRails_Discord_Bot_DOTNET.Modules
             }
         }
 
+        private void AddPermission()
+        {
+            var addPermissionCommand = new SlashCommandBuilder()
+                .WithName("add-permission")
+                .WithDescription("Add permission to edit modpack in the LandOfRails Launcher.")
+                .AddOption(new SlashCommandOptionBuilder()
+                    .WithName("server")
+                    .WithDescription("The server which belongs to the modpack.")
+                    .WithRequired(true)
+                    .AddChoice("Traincraft", "tc")
+                    .AddChoice("Immersive Railroading", "ir")
+                    .AddChoice("Real Train Mod", "rtm")
+                    .AddChoice("Zora no Densha", "znd")
+                    .WithType(ApplicationCommandOptionType.String)
+                );
+        }
+
         private List<Modpack> GetModpackList() => JsonConvert.DeserializeObject<List<Modpack>>(File.ReadAllText("/var/www/launcher/ModpackList.json"));
     }
 }
