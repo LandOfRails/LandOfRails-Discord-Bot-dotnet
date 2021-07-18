@@ -69,7 +69,9 @@ namespace LandOfRails_Discord_Bot_DOTNET.Modules
             context.Polls.Add(poll);
             await context.SaveChangesAsync();
             await context.DisposeAsync();
+#pragma warning disable 4014
             Task.Delay(poll.EndDatetime.Subtract(DateTime.Now)).ContinueWith(_ => FinishPoll(poll, Context.Channel));
+#pragma warning restore 4014
         }
 
         public async Task FinishPoll(Poll poll, ISocketMessageChannel socketMessageChannel)

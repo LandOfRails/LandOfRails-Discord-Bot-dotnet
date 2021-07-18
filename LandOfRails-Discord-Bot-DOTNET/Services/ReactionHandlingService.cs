@@ -27,7 +27,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Services
             _discord.ReactionsCleared += DiscordOnReactionsCleared;
         }
 
-        private async Task DiscordOnReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
+        private async Task DiscordOnReactionAdded(Cacheable<IUserMessage, ulong> arg1, Cacheable<IMessageChannel, ulong> arg2, SocketReaction arg3)
         {
             if (arg3.User.IsSpecified && !arg3.User.Value.IsBot && !arg3.User.Value.IsWebhook)
             {
@@ -56,12 +56,12 @@ namespace LandOfRails_Discord_Bot_DOTNET.Services
             }
         }
 
-        private async Task DiscordOnReactionRemoved(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
+        private async Task DiscordOnReactionRemoved(Cacheable<IUserMessage, ulong> arg1, Cacheable<IMessageChannel, ulong> arg2, SocketReaction arg3)
         {
 
         }
 
-        private async Task DiscordOnReactionsCleared(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2)
+        private async Task DiscordOnReactionsCleared(Cacheable<IUserMessage, ulong> arg1, Cacheable<IMessageChannel, ulong> arg2)
         {
 
         }

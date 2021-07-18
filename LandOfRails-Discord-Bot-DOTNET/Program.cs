@@ -7,6 +7,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using LandOfRails_Discord_Bot_DOTNET.Models;
+using LandOfRails_Discord_Bot_DOTNET.Modules;
 using LandOfRails_Discord_Bot_DOTNET.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -34,6 +35,8 @@ namespace LandOfRails_Discord_Bot_DOTNET
             services.GetRequiredService<MessageHandlingService>().register();
             services.GetRequiredService<ReactionHandlingService>().register();
             services.GetRequiredService<PollHandlingService>().register();
+            //services.GetRequiredService<ElectionHandlingService>().register();
+            services.GetRequiredService<SlashCommandService>().register();
 
             await Task.Delay(Timeout.Infinite);
         }
@@ -54,6 +57,8 @@ namespace LandOfRails_Discord_Bot_DOTNET
                 .AddSingleton<MessageHandlingService>()
                 .AddSingleton<ReactionHandlingService>()
                 .AddSingleton<PollHandlingService>()
+                .AddSingleton<ElectionHandlingService>()
+                .AddSingleton<SlashCommandService>()
                 .AddSingleton<HttpClient>()
                 .AddSingleton<lordiscordbotContext>()
                 .BuildServiceProvider();

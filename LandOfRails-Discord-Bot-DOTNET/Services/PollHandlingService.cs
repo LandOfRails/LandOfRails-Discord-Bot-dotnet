@@ -27,7 +27,7 @@ namespace LandOfRails_Discord_Bot_DOTNET.Services
             _discord.ReactionAdded += DiscordOnReactionAdded;
         }
 
-        private async Task DiscordOnReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
+        private async Task DiscordOnReactionAdded(Cacheable<IUserMessage, ulong> arg1, Cacheable<IMessageChannel, ulong> arg2, SocketReaction arg3)
         {
             var message = await arg1.GetOrDownloadAsync();
 
